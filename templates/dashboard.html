@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ระบบ Dynamic QR Code</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-edit {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .notice {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .notice.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .notice.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .qr-code-container {
+            text-align: center;
+        }
+
+        .qr-code-container canvas {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 5px;
+            background: white;
+        }
+
+        .short-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #667eea;
+            background: #f7fafc;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .url-link {
+            color: #4299e1;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .url-link:hover {
+            text-decoration: underline;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            font-size: 1.2rem;
+            color: #48bb78;
+        }
+
+        .file-name {
+            color: #22543d;
+            font-weight: 500;
+        }
+
+        .file-type-badge {
+            background: #e6fffa;
+            color: #22543d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .scan-count {
+            font-weight: bold;
+            color: #48bb78;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actions .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #cbd5e0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions .btn {
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-qrcode"></i> ระบบจัดการ Dynamic QR Code</h1>
+            <p>สร้าง แก้ไข และติดตาม QR Code ของคุณทั้งหมดได้ในที่เดียว</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="notice {{ category }}">
+                <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> สร้าง Dynamic Link ใหม่</h2>
+            
+            <div class="action-buttons">
+                <a href="{{ url_for('upload_file') }}" class="btn btn-upload">
+                    <i class="fas fa-cloud-upload-alt"></i> อัพโหลดไฟล์
+                </a>
+            </div>
+
+            <form action="{{ url_for('create_link') }}" method="post">
+                <div class="form-group">
+                    <label for="url"><i class="fas fa-link"></i> URL ปลายทาง:</label>
+                    <input type="url" name="url" id="url" placeholder="https://your-destination-url.com" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-magic"></i> สร้าง QR Code
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-list"></i> รายการ Dynamic Links</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-qrcode"></i> QR Code</th>
+                            <th><i class="fas fa-hashtag"></i> Short Code</th>
+                            <th><i class="fas fa-link"></i> URL ปลายทาง / ไฟล์</th>
+                            <th><i class="fas fa-chart-line"></i> จำนวนสแกน</th>
+                            <th><i class="fas fa-cogs"></i> จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for link in links %}
+                        <tr>
+                            <td class="qr-code-container">
+                                <canvas id="qr-{{ link.id }}"></canvas>
+                            </td>
+                            <td><span class="short-code">{{ link.short_code }}</span></td>
+                            <td>
+                                {% if link.file_name %}
+                                    <div class="file-info">
+                                        <div class="file-icon">
+                                            <i class="fas fa-file"></i>
+                                        </div>
+                                        <div>
+                                            <div class="file-name">{{ link.file_name }}</div>
+                                            <span class="file-type-badge">{{ link.file_type }}</span>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <a href="{{ link.original_url }}" target="_blank" class="url-link">{{ link.original_url }}</a>
+                                {% endif %}
+                            </td>
+                            <td><span class="scan-count">{{ link.scan_count }}</span></td>
+                            <td class="actions">
+                                <a href="{{ url_for('download_qr_code', short_code=link.short_code) }}" class="btn btn-download" title="ดาวน์โหลด QR Code">
+                                    <i class="fas fa-download"></i> ดาวน์โหลด QR
+                                </a>
+                                <a href="{{ url_for('edit_link', link_id=link.id) }}" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> แก้ไข
+                                </a>
+                                <form action="{{ url_for('delete_link', link_id=link.id) }}" method="post" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบลิงก์นี้?');" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> ลบ
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <script>
+                            QRCode.toCanvas(document.getElementById('qr-{{ link.id }}'), '{{ request.host_url }}{{ link.short_code }}', { 
+                                width: 100,
+                                margin: 2,
+                                color: {
+                                    dark: '#667eea',
+                                    light: '#ffffff'
+                                }
+                            }, function (error) {
+                                if (error) console.error(error)
+                            })
+                        </script>
+                        {% else %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <h3>ยังไม่มีการสร้าง Link</h3>
+                                    <p>เริ่มต้นด้วยการสร้าง Dynamic Link แรกของคุณ</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

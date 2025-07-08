@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  qr-app:
+    build: .
+    container_name: qr-code-app
+    expose:
+      - "5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+    volumes:
+      # Mount โฟลเดอร์ uploads เพื่อเก็บไฟล์ที่อัพโหลด
+      - ./uploads:/app/uploads
+      # Mount โฟลเดอร์ instance เพื่อเก็บฐานข้อมูล
+      - ./instance:/app/instance
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  nginx:
+    image: nginx:1.25
+    container_name: qr-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - qr-app
+    restart: unless-stopped 
